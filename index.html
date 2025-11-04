@@ -1,264 +1,175 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Receipt Generator — Canada Style</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canada Visa Services - Receipt Generator</title>
 <style>
-  :root{--brand:#0b5fd7;--accent:#e33;--bg:#f7f8fb}
-  body{font-family:Inter, system-ui, -apple-system, Roboto, "Segoe UI", Arial; background:var(--bg); margin:0; padding:28px}
-  .wrap{max-width:900px;margin:0 auto}
-  .card{background:#fff;padding:18px;border-radius:10px;box-shadow:0 10px 30px rgba(10,12,20,0.06)}
-  h1{margin:0 0 8px;font-size:20px}
-  label{display:block;margin-top:10px;font-weight:600;font-size:13px}
-  input, textarea{width:100%;padding:10px;border:1px solid #e6e9ee;border-radius:8px;font-size:14px}
-  .row{display:flex;gap:12px}
-  .col{flex:1}
-  .btn{background:var(--brand);color:#fff;border:0;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer}
-  .btn-ghost{background:transparent;border:1px solid #cfd6ea;padding:8px 12px;border-radius:8px;cursor:pointer}
-  .out{margin-top:12px;padding:12px;background:#f3f6fb;border-radius:8px;word-break:break-all}
-
-  /* receipt styles */
-  .receipt-wrap{margin-top:18px}
-  .receipt{position:relative;background:#fff;padding:22px;border:1px solid #eef2f8;border-radius:8px;min-height:320px}
-  .receipt .header{display:flex;justify-content:space-between;align-items:center}
-  .logo-mark{display:flex;gap:12px;align-items:center}
-  .brand-title{font-weight:800;color:#1b2438}
-  .meta{font-size:13px;color:#556}
-  .details{margin-top:18px}
-  .line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #eef3fb}
-  .note{margin-top:12px;color:#667}
-  .print-row{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
-
-  /* stamp overlays */
-  .stamp{position:absolute;pointer-events:none;filter:drop-shadow(0 2px 8px rgba(5,20,60,0.12));}
-  .stamp--paid{right:18px;top:110px;transform:rotate(-14deg);opacity:0.95}
-  .stamp--circle{left:28px;top:40px;transform:rotate(-8deg);opacity:0.9}
-
-  /* print styles */
-  @media print{
-    body{background:white}
-    .wrap>.card{box-shadow:none}
-    .receipt *{color:#000}
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: #f2f5f9;
+    margin: 0;
+    padding: 0;
+  }
+  .container {
+    max-width: 600px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 30px;
+  }
+  h2 {
+    text-align: center;
+    color: #0a3d62;
+  }
+  form label {
+    font-weight: 600;
+    display: block;
+    margin-top: 10px;
+  }
+  form input, form textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-top: 5px;
+  }
+  button {
+    margin-top: 20px;
+    width: 100%;
+    background-color: #0a3d62;
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    cursor: pointer;
+  }
+  button:hover {
+    background-color: #074b8a;
   }
 
-  /* small helper */
-  .muted{color:#6b7280;font-size:13px}
+  /* Receipt Styles */
+  #receipt {
+    display: none;
+    text-align: center;
+    padding: 20px;
+  }
+  .receipt-box {
+    border: 1px solid #ccc;
+    padding: 25px;
+    border-radius: 10px;
+    position: relative;
+  }
+  .logo {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  .logo img {
+    width: 120px;
+  }
+  .business-name {
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    color: #b00000;
+    margin-bottom: 10px;
+  }
+  .info {
+    text-align: left;
+    margin-top: 15px;
+    font-size: 16px;
+  }
+  .stamp-paid {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    width: 150px;
+    opacity: 0.6;
+  }
+  .stamp-round {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    width: 120px;
+    opacity: 0.5;
+  }
+  #printBtn {
+    background-color: #1b5e20;
+    margin-top: 20px;
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="card">
-    <h1>Receipt Generator</h1>
-    <p class="muted">Fill the customer details and generate a printable receipt link. The receipt includes a brand logo and realistic blue stamps.</p>
 
-    <div id="form-area">
-      <label>Merchant name</label>
-      <input id="merchant" value="Canada Visa Services"/>
+<div class="container" id="formContainer">
+  <h2>Canada Visa Services - Receipt Form</h2>
+  <form id="receiptForm" onsubmit="generateReceipt(event)">
+    <label>Customer Name:</label>
+    <input type="text" id="customerName" required>
 
-      <div class="row">
-        <div class="col">
-          <label>Customer name</label>
-          <input id="customer" placeholder="Full name"/>
-        </div>
-        <div class="col">
-          <label>Amount (ETB)</label>
-          <input id="amount" type="number" step="0.01" placeholder="e.g., 150"/>
-        </div>
-      </div>
+    <label>Phone Number:</label>
+    <input type="text" id="phoneNumber" required>
 
-      <label>Payment method / Note</label>
-      <input id="note" placeholder="Telebirr / CBE / Cash on delivery"/>
+    <label>Service Type:</label>
+    <input type="text" id="serviceType" required>
 
-      <div class="row" style="margin-top:10px">
-        <div class="col">
-          <label>Date</label>
-          <input id="date" placeholder="YYYY-MM-DD"/>
-        </div>
-        <div class="col">
-          <label>Reference</label>
-          <input id="tx" placeholder="Order ID or transaction ref"/>
-        </div>
-      </div>
+    <label>Reason for Payment:</label>
+    <textarea id="reason" rows="3" required></textarea>
 
-      <div style="margin-top:12px;display:flex;gap:8px">
-        <button id="gen" class="btn">Generate Link</button>
-        <button id="clear" class="btn-ghost">Clear</button>
-      </div>
+    <label>Amount Paid (ETB):</label>
+    <input type="number" id="amount" required>
 
-      <div id="output" class="out" style="display:none">
-        <div><strong>Shareable link</strong></div>
-        <div id="link" style="margin-top:6px"></div>
-        <div style="margin-top:8px;display:flex;gap:8px">
-          <button id="copy" class="btn-ghost">Copy</button>
-          <button id="open" class="btn-ghost">Open</button>
-        </div>
-      </div>
-    </div>
+    <label>Date:</label>
+    <input type="text" id="date" placeholder="e.g., 03 Nov 2025" required>
 
-    <div class="receipt-wrap" id="receipt-area"></div>
-  </div>
+    <label>Reference ID:</label>
+    <input type="text" id="reference" placeholder="Enter reference number" required>
+
+    <button type="submit">Generate Receipt</button>
+  </form>
 </div>
 
-<!-- Inline SVG assets: logo + stamp defs -->
-<svg width="0" height="0" style="position:absolute">
-  <defs>
-    <!-- subtle paper grain filter for stamps -->
-    <filter id="grain">
-      <feturbulence baseFrequency="0.9" numOctaves="1" stitchTiles="stitch" result="t" />
-      <fecolormatrix type="saturate" values="0"/>
-      <fecomponenttransfer>
-        <feFuncA type="table" tableValues="0 0.25" />
-      </fecomponenttransfer>
-      <fedisplacementmap in="SourceGraphic" in2="t" scale="2" xChannelSelector="R" yChannelSelector="G" />
-    </filter>
-    <!-- soft edge for stamps -->
-    <filter id="soften" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="0.6"/>
-    </filter>
-  </defs>
-</svg>
+<div class="container" id="receipt">
+  <div class="receipt-box">
+    <div class="logo">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/d/d9/Maple_Leaf.svg" alt="Logo">
+    </div>
+    <div class="business-name">Canada Visa Services</div>
+
+    <div class="info" id="receiptInfo"></div>
+
+    <img src="https://i.imgur.com/2I3E0Hq.png" alt="Paid Stamp" class="stamp-paid">
+    <img src="https://i.imgur.com/PHJr99P.png" alt="Round Stamp" class="stamp-round">
+  </div>
+  <button id="printBtn" onclick="window.print()">🖨️ Print / Save PDF</button>
+</div>
 
 <script>
-(function(){
-  const merchantInput = document.getElementById('merchant');
-  const customerInput = document.getElementById('customer');
-  const amountInput = document.getElementById('amount');
-  const noteInput = document.getElementById('note');
-  const dateInput = document.getElementById('date');
-  const txInput = document.getElementById('tx');
-  const genBtn = document.getElementById('gen');
-  const clearBtn = document.getElementById('clear');
-  const out = document.getElementById('output');
-  const linkDiv = document.getElementById('link');
-  const copyBtn = document.getElementById('copy');
-  const openBtn = document.getElementById('open');
-  const receiptArea = document.getElementById('receipt-area');
+function generateReceipt(event) {
+  event.preventDefault();
+  document.getElementById('formContainer').style.display = 'none';
+  const name = document.getElementById('customerName').value;
+  const phone = document.getElementById('phoneNumber').value;
+  const service = document.getElementById('serviceType').value;
+  const reason = document.getElementById('reason').value;
+  const amount = document.getElementById('amount').value;
+  const date = document.getElementById('date').value;
+  const ref = document.getElementById('reference').value;
 
-  function todaysISO(){ const d = new Date(); const pad = s=>('0'+s).slice(-2); return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) }
-
-  genBtn.addEventListener('click', ()=>{
-    const payload = {
-      merchant: merchantInput.value || 'Canada Visa Services',
-      customer: customerInput.value || 'Customer',
-      amount: String(amountInput.value || ''),
-      note: noteInput.value || '',
-      date: dateInput.value || todaysISO(),
-      tx: txInput.value || ('r'+Math.random().toString(36).slice(2,10))
-    };
-    const json = JSON.stringify(payload);
-    const b64 = btoa(unescape(encodeURIComponent(json)));
-    const url = location.origin + location.pathname + '#r=' + b64;
-    linkDiv.textContent = url;
-    out.style.display = 'block';
-  });
-
-  clearBtn.addEventListener('click', ()=>{
-    merchantInput.value = 'Canada Visa Services';
-    customerInput.value = '';
-    amountInput.value = '';
-    noteInput.value = '';
-    dateInput.value = '';
-    txInput.value = '';
-    out.style.display = 'none';
-    linkDiv.textContent = '';
-    receiptArea.innerHTML = '';
-    history.replaceState(null,'',location.pathname);
-  });
-
-  copyBtn.addEventListener('click', ()=>{
-    const text = linkDiv.textContent;
-    if(!text) return alert('No link yet. Generate first.');
-    navigator.clipboard?.writeText(text).then(()=>alert('Link copied'));
-  });
-
-  openBtn.addEventListener('click', ()=>{
-    const text = linkDiv.textContent;
-    if(!text) return alert('No link yet. Generate first.');
-    window.open(text,'_blank');
-  });
-
-  function formatCurrency(x){ if(x==='') return ''; const num = Number(String(x).replace(/,/g,'')); if(Number.isNaN(num)) return x; const parts = num.toFixed(2).split('.'); let int = parts[0], dec = parts[1]; let out = ''; while(int.length > 3){ out = ',' + int.slice(-3) + out; int = int.slice(0, -3); } out = int + out; return out + ' ETB'; }
-
-  function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&<>'"]/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
-
-  function showReceipt(data){
-    receiptArea.innerHTML = '';
-    const r = document.createElement('div');
-    r.className = 'receipt';
-    r.innerHTML = `
-      <div class="header">
-        <div class="logo-mark">
-          <!-- inline SVG logo (maple-like symbol) -->
-          <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-            <defs>
-              <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#d83e3e"/><stop offset="1" stop-color="#b71c1c"/></linearGradient>
-              <filter id="emboss"><feGaussianBlur stdDeviation="0.3" result="b"/><feComposite in="SourceGraphic" in2="b" operator="arithmetic" k1="0" k2="1" k3="-1" k4="0"/></filter>
-            </defs>
-            <rect width="64" height="64" rx="8" fill="#fff" />
-            <g transform="translate(8 8) scale(0.75)">
-              <path d="M24 2c-1 5-6 6-6 6s4 3 4 7c0 3-4 5-4 5s3 5 1 9c-2 4-6 3-6 3s-5-6-9-4c-4 2-6 8-6 8s-1-6 1-13c2-7 9-11 14-16 5-5 9-12 9-12s4 6 3 11z" fill="url(#g1)" stroke="#8a1b1b" stroke-width="0.6" />
-            </g>
-          </svg>
-          <div>
-            <div class="brand-title">${escapeHtml(data.merchant || '')}</div>
-            <div class="meta">Electronic Receipt</div>
-          </div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-weight:800">${escapeHtml(data.tx || '')}</div>
-          <div class="meta">${escapeHtml(data.date || '')}</div>
-        </div>
-      </div>
-
-      <div class="details">
-        <div class="line"><div><strong>Received from:</strong> ${escapeHtml(data.customer||'')}</div><div><strong>Amount:</strong> ${formatCurrency(data.amount)}</div></div>
-        <div class="line"><div><strong>Note:</strong> ${escapeHtml(data.note||'')}</div><div></div></div>
-      </div>
-
-      <div class="note"><small>This is an electronically generated receipt. Keep the link for your records.</small></div>
-
-      <div class="print-row">
-        <button id="printBtn" class="btn-ghost">Print / Save as PDF</button>
-        <button id="backBtn" class="btn-ghost">Back to create</button>
-      </div>
-
-      <!-- stamps inserted visually via absolute-positioned SVGs -->
-      <svg class="stamp stamp--paid" width="220" height="80" viewBox="0 0 220 80" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-        <defs>
-          <filter id="f1"><feTurbulence baseFrequency="0.9" numOctaves="1" stitchTiles="stitch" result="t"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 0.45"/></feComponentTransfer><feBlend in="SourceGraphic" in2="t" mode="multiply"/></filter>
-        </defs>
-        <g filter="url(#f1)">
-          <rect x="6" y="6" width="208" height="68" rx="6" fill="none" stroke="#1e6fe8" stroke-width="6" opacity="0.95"/>
-          <text x="110" y="46" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="800" fill="#1e6fe8" text-anchor="middle" dominant-baseline="middle">PAID</text>
-        </g>
-      </svg>
-
-      <svg class="stamp stamp--circle" width="140" height="140" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-        <defs>
-          <filter id="f2"><feTurbulence baseFrequency="0.6" numOctaves="1" stitchTiles="stitch" result="t"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 0.5"/></feComponentTransfer></filter>
-        </defs>
-        <g filter="url(#f2)" transform="translate(0,0)">
-          <circle cx="70" cy="70" r="54" fill="none" stroke="#1e6fe8" stroke-width="6" opacity="0.95"/>
-          <path d="M70 36c-9 0-16 7-16 16s7 16 16 16 16-7 16-16-7-16-16-16z" fill="#1e6fe8" opacity="0.12"/>
-          <text x="70" y="74" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#1e6fe8" text-anchor="middle">CANADA VISA SERVICES</text>
-          <text x="70" y="89" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#1e6fe8" text-anchor="middle">Ethiopian Branch</text>
-        </g>
-      </svg>
-    `;
-
-    receiptArea.appendChild(r);
-
-    document.getElementById('printBtn').addEventListener('click', ()=> window.print());
-    document.getElementById('backBtn').addEventListener('click', ()=>{ history.replaceState(null,'',location.pathname); receiptArea.innerHTML=''; out.style.display='none'; });
-  }
-
-  function renderFromHash(){ receiptArea.innerHTML=''; const hash = location.hash || ''; const m = hash.match(/r=([^&]+)/); if(!m) return; try{ const b64 = m[1]; const json = decodeURIComponent(escape(atob(b64))); const data = JSON.parse(json); showReceipt(data); }catch(e){ receiptArea.innerHTML = '<div style="color:#a00">Invalid receipt data.</div>'; } }
-
-  window.addEventListener('load', renderFromHash);
-  window.addEventListener('hashchange', renderFromHash);
-
-})();
+  document.getElementById('receiptInfo').innerHTML = `
+    <p><strong>Customer Name:</strong> ${name}</p>
+    <p><strong>Phone Number:</strong> ${phone}</p>
+    <p><strong>Service Type:</strong> ${service}</p>
+    <p><strong>Reason for Payment:</strong> ${reason}</p>
+    <p><strong>Amount Paid:</strong> ${amount} ETB</p>
+    <p><strong>Date:</strong> ${date}</p>
+    <p><strong>Reference ID:</strong> ${ref}</p>
+  `;
+  document.getElementById('receipt').style.display = 'block';
+}
 </script>
+
 </body>
 </html>
