@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Canada Visa Services - Receipt Generator</title>
+<title>Canada Visa Services - Official Receipt</title>
 <style>
   body {
     font-family: "Segoe UI", Arial, sans-serif;
@@ -11,23 +11,28 @@
     margin: 0;
     padding: 0;
   }
+
   .container {
-    max-width: 600px;
+    max-width: 700px;
     margin: 40px auto;
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     padding: 30px;
   }
+
   h2 {
     text-align: center;
     color: #0a3d62;
+    font-size: 22px;
   }
+
   form label {
     font-weight: 600;
     display: block;
     margin-top: 10px;
   }
+
   form input, form textarea {
     width: 100%;
     padding: 8px;
@@ -35,6 +40,7 @@
     border-radius: 6px;
     margin-top: 5px;
   }
+
   button {
     margin-top: 20px;
     width: 100%;
@@ -46,6 +52,7 @@
     padding: 10px;
     cursor: pointer;
   }
+
   button:hover {
     background-color: #074b8a;
   }
@@ -53,48 +60,88 @@
   /* Receipt Styles */
   #receipt {
     display: none;
-    text-align: center;
     padding: 20px;
   }
+
   .receipt-box {
     border: 1px solid #ccc;
-    padding: 25px;
+    padding: 30px;
     border-radius: 10px;
     position: relative;
   }
+
   .logo {
     text-align: center;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
   }
+
   .logo img {
     width: 120px;
   }
-  .business-name {
+
+  .header-text {
     text-align: center;
     font-size: 22px;
     font-weight: bold;
     color: #b00000;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
   }
-  .info {
+
+  .sub-header {
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 20px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  td {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+  }
+
+  td.label {
+    background: #f4f4f4;
+    font-weight: bold;
+    width: 40%;
+  }
+
+  .footer {
+    margin-top: 30px;
     text-align: left;
-    margin-top: 15px;
-    font-size: 16px;
+    font-size: 14px;
   }
+
+  .signature {
+    margin-top: 40px;
+    text-align: right;
+    font-size: 15px;
+    font-style: italic;
+  }
+
   .stamp-paid {
     position: absolute;
-    bottom: 40px;
-    right: 40px;
+    bottom: 60px;
+    right: 50px;
     width: 150px;
     opacity: 0.6;
   }
+
   .stamp-round {
     position: absolute;
     top: 40px;
     left: 40px;
     width: 120px;
-    opacity: 0.5;
+    opacity: 0.45;
+    transform: rotate(-10deg);
   }
+
   #printBtn {
     background-color: #1b5e20;
     margin-top: 20px;
@@ -134,15 +181,31 @@
 <div class="container" id="receipt">
   <div class="receipt-box">
     <div class="logo">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/d/d9/Maple_Leaf.svg" alt="Logo">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/Maple_Leaf.svg" alt="Logo">
     </div>
-    <div class="business-name">Canada Visa Services</div>
 
-    <div class="info" id="receiptInfo"></div>
+    <div class="header-text">Canada Visa Services</div>
+    <div class="sub-header">Addis Ababa, Ethiopia • Tel: +251-900-000-000 • Email: info@canadavisaservices.com</div>
 
-    <img src="https://i.imgur.com/2I3E0Hq.png" alt="Paid Stamp" class="stamp-paid">
-    <img src="https://i.imgur.com/PHJr99P.png" alt="Round Stamp" class="stamp-round">
+    <table>
+      <tr><td class="label">Customer Name</td><td id="rName"></td></tr>
+      <tr><td class="label">Phone Number</td><td id="rPhone"></td></tr>
+      <tr><td class="label">Service Type</td><td id="rService"></td></tr>
+      <tr><td class="label">Reason for Payment</td><td id="rReason"></td></tr>
+      <tr><td class="label">Amount Paid</td><td id="rAmount"></td></tr>
+      <tr><td class="label">Date</td><td id="rDate"></td></tr>
+      <tr><td class="label">Reference ID</td><td id="rRef"></td></tr>
+    </table>
+
+    <div class="signature">
+      ___________________________<br>
+      Authorized Signature
+    </div>
+
+    <img src="https://cdn-icons-png.flaticon.com/512/5542/5542339.png" alt="Paid Stamp" class="stamp-paid">
+    <img src="https://cdn-icons-png.flaticon.com/512/6812/6812921.png" alt="Round Stamp" class="stamp-round">
   </div>
+
   <button id="printBtn" onclick="window.print()">🖨️ Print / Save PDF</button>
 </div>
 
@@ -150,23 +213,15 @@
 function generateReceipt(event) {
   event.preventDefault();
   document.getElementById('formContainer').style.display = 'none';
-  const name = document.getElementById('customerName').value;
-  const phone = document.getElementById('phoneNumber').value;
-  const service = document.getElementById('serviceType').value;
-  const reason = document.getElementById('reason').value;
-  const amount = document.getElementById('amount').value;
-  const date = document.getElementById('date').value;
-  const ref = document.getElementById('reference').value;
 
-  document.getElementById('receiptInfo').innerHTML = `
-    <p><strong>Customer Name:</strong> ${name}</p>
-    <p><strong>Phone Number:</strong> ${phone}</p>
-    <p><strong>Service Type:</strong> ${service}</p>
-    <p><strong>Reason for Payment:</strong> ${reason}</p>
-    <p><strong>Amount Paid:</strong> ${amount} ETB</p>
-    <p><strong>Date:</strong> ${date}</p>
-    <p><strong>Reference ID:</strong> ${ref}</p>
-  `;
+  document.getElementById('rName').innerText = document.getElementById('customerName').value;
+  document.getElementById('rPhone').innerText = document.getElementById('phoneNumber').value;
+  document.getElementById('rService').innerText = document.getElementById('serviceType').value;
+  document.getElementById('rReason').innerText = document.getElementById('reason').value;
+  document.getElementById('rAmount').innerText = document.getElementById('amount').value + " ETB";
+  document.getElementById('rDate').innerText = document.getElementById('date').value;
+  document.getElementById('rRef').innerText = document.getElementById('reference').value;
+
   document.getElementById('receipt').style.display = 'block';
 }
 </script>
